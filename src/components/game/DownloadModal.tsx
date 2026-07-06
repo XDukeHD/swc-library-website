@@ -93,7 +93,7 @@ export default function DownloadModal({ downloadLinks, gameTitle }: DownloadModa
 
               {/* Warning/Disclaimer footer */}
               <p className="text-[10px] text-text-secondary leading-relaxed bg-brand-red/5 border border-brand-red/10 p-3 rounded-lg">
-                <strong>Important:</strong> You must own the original retail copy of this game to keep this backup. Please support game developers!
+                <strong>Important:</strong> If it's an indie game and you can afford it, consider buying the original game to support the developers :3
               </p>
             </motion.div>
           </div>
