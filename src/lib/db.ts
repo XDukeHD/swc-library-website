@@ -123,11 +123,11 @@ export const db = {
     if (error) throw error;
   },
 
-  async getGames(): Promise<(Game & { publisher?: Publisher; categories?: Category[] })[]> {
+  async getGames(): Promise<(Game & { publisher?: Publisher; categories?: Category[]; download_links?: DownloadLink[] })[]> {
     const supabase = getPublicClient();
     const { data, error } = await supabase
       .from('games')
-      .select('*, publisher:publishers(*), game_categories(category:categories(*))')
+      .select('*, publisher:publishers(*), game_categories(category:categories(*)), download_links(*)')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -141,6 +141,7 @@ export const db = {
       ...game,
       publisher: game.publisher || undefined,
       categories: game.game_categories?.map((gc: any) => gc.category).filter(Boolean) || [],
+      download_links: game.download_links || [],
     }));
   },
 

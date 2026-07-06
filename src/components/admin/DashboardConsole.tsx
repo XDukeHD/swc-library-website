@@ -17,8 +17,15 @@ import {
 import { Game, Category, Publisher, DownloadLink, Comment, Report, Admin, Mirror } from '@/lib/types';
 import Image from 'next/image';
 
+interface FlatMirror {
+  id: string;
+  version: string;
+  label: string;
+  url: string;
+}
+
 interface DashboardConsoleProps {
-  initialGames: (Game & { publisher?: Publisher; categories?: Category[] })[];
+  initialGames: (Game & { publisher?: Publisher; categories?: Category[]; download_links?: DownloadLink[] })[];
   initialCategories: Category[];
   initialPublishers: Publisher[];
   initialComments: (Comment & { game_title?: string })[];
@@ -64,7 +71,7 @@ export default function DashboardConsole({
   const [gamePubId, setGamePubId] = useState('');
   const [gameCategoryIds, setGameCategoryIds] = useState<string[]>([]);
 
-  const [gameDownloads, setGameDownloads] = useState<{ version: string; mirrors: Mirror[] }[]>([]);
+  const [gameDownloads, setGameDownloads] = useState<FlatMirror[]>([]);
   const [newVersionTitle, setNewVersionTitle] = useState('');
   const [newMirrorLabel, setNewMirrorLabel] = useState('Google Drive');
   const [newMirrorUrl, setNewMirrorUrl] = useState('');
@@ -119,11 +126,20 @@ export default function DashboardConsole({
       setGameVersion(game.game_version);
       setGamePubId(game.publisher_id || '');
       setGameCategoryIds(game.categories?.map((c: any) => c.id) || []);
-      
-
       const matchedGame = initialGames.find(g => g.id === game.id);
-
-      setGameDownloads((matchedGame as any)?.download_links || []);
+      const dbLinks = matchedGame?.download_links || [];
+      const initialFlat: FlatMirror[] = [];
+      dbLinks.forEach(link => {
+        link.mirrors?.forEach(m => {
+          initialFlat.push({
+            id: Math.random().toString(36).substring(2, 9),
+            version: link.version,
+            label: m.label,
+            url: m.url
+          });
+        });
+      });
+      setGameDownloads(initialFlat);
     } else {
       setEditId(null);
       setGameTitle('');
@@ -166,13 +182,24 @@ export default function DashboardConsole({
       game_version: gameVersion,
       publisher_id: gamePubId
     };
-
+    const groupedByVersion: Record<string, Mirror[]> = {};
+    gameDownloads.forEach(m => {
+      if (!m.version.trim() || !m.url.trim()) return;
+      if (!groupedByVersion[m.version]) {
+        groupedByVersion[m.version] = [];
+      }
+      groupedByVersion[m.version].push({ label: m.label, url: m.url });
+    });
+    const downloadLinksToSend = Object.entries(groupedByVersion).map(([version, mirrors]) => ({
+      version,
+      mirrors
+    }));
     try {
       if (editId) {
-        await updateGameAction(editId, gameData, gameCategoryIds, gameDownloads);
+        await updateGameAction(editId, gameData, gameCategoryIds, downloadLinksToSend);
         showFeedback('Game updated successfully!');
       } else {
-        await createGameAction(gameData, gameCategoryIds, gameDownloads);
+        await createGameAction(gameData, gameCategoryIds, downloadLinksToSend);
         showFeedback('Game created successfully!');
       }
       setActiveModal(null);
@@ -201,22 +228,17 @@ export default function DashboardConsole({
       alert('Please fill version title and mirror URL');
       return;
     }
-    const existingVerIdx = gameDownloads.findIndex(d => d.version === newVersionTitle);
-    if (existingVerIdx !== -1) {
-      const updated = [...gameDownloads];
-      updated[existingVerIdx].mirrors.push({ label: newMirrorLabel, url: newMirrorUrl });
-      setGameDownloads(updated);
-    } else {
-      setGameDownloads([
-        ...gameDownloads,
-        { version: newVersionTitle, mirrors: [{ label: newMirrorLabel, url: newMirrorUrl }] }
-      ]);
-    }
+    const newId = Math.random().toString(36).substring(2, 9);
+    setGameDownloads([
+      ...gameDownloads,
+      {
+        id: newId,
+        version: newVersionTitle,
+        label: newMirrorLabel,
+        url: newMirrorUrl
+      }
+    ]);
     setNewMirrorUrl('');
-  };
-
-  const removeVersionFromDownloads = (idx: number) => {
-    setGameDownloads(gameDownloads.filter((_, i) => i !== idx));
   };
 
 
@@ -1039,22 +1061,64 @@ export default function DashboardConsole({
                   </div>
                 </div>
 
-                {/* Display added links */}
-                <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-                  {gameDownloads.map((dl, idx) => (
-                    <div key={idx} className="flex justify-between items-center bg-bg-surface p-2.5 rounded-lg border border-white/5 text-xs">
-                      <div>
-                        <strong className="text-brand-purple">{dl.version}</strong>
-                        <span className="text-text-secondary ml-2">({dl.mirrors.map(m => m.label).join(', ')})</span>
+                <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto mt-2">
+                  {gameDownloads.length === 0 ? (
+                    <span className="text-xs text-text-secondary text-center py-4">No download links added yet.</span>
+                  ) : (
+                    Object.entries(
+                      gameDownloads.reduce((acc, m) => {
+                        if (!acc[m.label]) {
+                          acc[m.label] = [];
+                        }
+                        acc[m.label].push(m);
+                        return acc;
+                      }, {} as Record<string, FlatMirror[]>)
+                    ).map(([label, mirrors]) => (
+                      <div key={label} className="flex flex-col gap-2 bg-bg-surface/50 p-3 rounded-lg border border-white/5">
+                        <span className="text-[10px] font-bold text-brand-purple uppercase tracking-wider">{label}</span>
+                        <div className="flex flex-col gap-2">
+                          {mirrors.map((m) => (
+                            <div key={m.id} className="flex flex-col sm:flex-row gap-2 items-center bg-bg-surface p-2 rounded-lg border border-white/5">
+                              <input
+                                type="text"
+                                value={m.version}
+                                onChange={(e) => setGameDownloads(gameDownloads.map(item => item.id === m.id ? { ...item, version: e.target.value } : item))}
+                                className="input-field text-xs flex-1 w-full"
+                                placeholder="Version"
+                              />
+                              <input
+                                type="url"
+                                value={m.url}
+                                onChange={(e) => setGameDownloads(gameDownloads.map(item => item.id === m.id ? { ...item, url: e.target.value } : item))}
+                                className="input-field text-xs flex-2 w-full"
+                                placeholder="URL"
+                              />
+                              <select
+                                value={m.label}
+                                onChange={(e) => setGameDownloads(gameDownloads.map(item => item.id === m.id ? { ...item, label: e.target.value } : item))}
+                                className="input-field text-xs select-none w-full sm:w-32"
+                              >
+                                <option value="Direct Download">Direct Download</option>
+                                <option value="Google Drive">Google Drive</option>
+                                <option value="Mega">Mega</option>
+                                <option value="1Fichier">1Fichier</option>
+                                <option value="MediaFire">MediaFire</option>
+                                <option value="BayFiles">BayFiles</option>
+                                <option value="FilePress">FilePress</option>
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => setGameDownloads(gameDownloads.filter(item => item.id !== m.id))}
+                                className="text-brand-red hover:underline font-bold text-xs shrink-0"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <button
-                        type="button" onClick={() => removeVersionFromDownloads(idx)}
-                        className="text-brand-red hover:underline font-bold"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </div>

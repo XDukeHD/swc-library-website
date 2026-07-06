@@ -69,7 +69,7 @@ export default async function Home({ searchParams }: HomeProps) {
               <div className="md:col-span-7 flex flex-col gap-6 text-center md:text-left">
                 <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full w-fit mx-auto md:mx-0">
                   <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse" />
-                  <span className="text-xs text-text-primary font-bold tracking-wider uppercase">Nintendo Switch ROMs Archival</span>
+                  <span className="text-xs text-text-primary font-bold tracking-wider uppercase">Nintendo Switch ROMs</span>
                 </div>
                 <h1 className="text-4xl md:text-6xl font-black text-text-primary leading-none tracking-tight">
                   YOUR ULTIMATE <br />
@@ -78,7 +78,7 @@ export default async function Home({ searchParams }: HomeProps) {
                   </span>
                 </h1>
                 <p className="text-text-secondary text-base md:text-lg max-w-lg leading-relaxed">
-                  Download Switch ROMs in NSP and XCI formats. Zero ads, direct high-speed mirrors, and game updates at your fingertips.
+                  Download Switch ROMs in NSP and XCI formats. Direct high-speed mirrors, and game updates at your fingertips.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 items-center justify-center md:justify-start">
                   <a
