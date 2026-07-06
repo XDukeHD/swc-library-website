@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { FiChevronLeft, FiInfo, FiCalendar, FiGlobe, FiCpu, FiTag, FiFileText } from 'react-icons/fi';
 import ClientPageTransition from '@/components/ClientPageTransition';
 import GameCard from '@/components/GameCard';
+import type { Metadata } from 'next';
 
 // Import interactive subcomponents
 import LikeButton from '@/components/game/LikeButton';
@@ -13,6 +14,41 @@ import CommentsSection from '@/components/game/CommentsSection';
 
 interface GameDetailPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: GameDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const game = await db.getGameBySlug(slug);
+
+  if (!game) {
+    return {
+      title: 'Game Not Found',
+    };
+  }
+
+  const pageTitle = `Download ${game.title}`;
+  const absoluteTitle = `${pageTitle} | SWC Library`;
+  const description = game.description 
+    ? (game.description.length > 160 ? `${game.description.substring(0, 157)}...` : game.description)
+    : `Download ${game.title} ROM for Nintendo Switch. Safe NSP/XCI backup files with fast mirrors.`;
+  const imageUrl = game.cover_image || '';
+
+  return {
+    title: pageTitle,
+    description,
+    openGraph: {
+      title: absoluteTitle,
+      description,
+      images: imageUrl ? [{ url: imageUrl, alt: game.title }] : [],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: absoluteTitle,
+      description,
+      images: imageUrl ? [imageUrl] : [],
+    },
+  };
 }
 
 export default async function GameDetailPage({ params }: GameDetailPageProps) {
