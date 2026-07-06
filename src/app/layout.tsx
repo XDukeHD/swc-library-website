@@ -23,13 +23,13 @@ export const metadata: Metadata = {
   },
   description: "Download safe, fast, and verified Nintendo Switch backup ROMs. Browse the latest NSP and XCI games, updates, and DLCs for your emulation or modded console.",
   keywords: [
-    "Nintendo Switch ROMs", 
-    "Switch backups", 
-    "NSP downloads", 
-    "XCI files", 
-    "Switch emulation", 
-    "Yuzu ROMs", 
-    "Ryujinx backups", 
+    "Nintendo Switch ROMs",
+    "Switch backups",
+    "NSP downloads",
+    "XCI files",
+    "Switch emulation",
+    "Yuzu ROMs",
+    "Ryujinx backups",
     "Switch modding",
     "SWC Library"
   ],
@@ -89,10 +89,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-bg-dark text-text-primary">
         <Navbar />
-        <Analytics />
-        <SpeedInsights />
+
         <main className="flex flex-col flex-1">
           {children}
+          <Analytics />
+          <SpeedInsights />
         </main>
         <Footer />
       </body>
