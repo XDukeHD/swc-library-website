@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-red: #E63946;
+  --color-brand-purple: #6A4C93;
+  --color-bg-dark: #14141B;
+  --color-bg-surface: #1E1E28;
+  --color-bg-card: #252533;
+  --color-text-primary: #F5F5FA;
+  --color-text-secondary: #9E9EAF;
+  
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+:root {
+  --background: #14141B;
+  --foreground: #F5F5FA;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #14141B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #252533;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6A4C93;
+}
+
+/* Custom styles for glowing details */
+.glow-red {
+  text-shadow: 0 0 10px rgba(230, 57, 70, 0.4);
+}
+
+.glow-purple {
+  text-shadow: 0 0 10px rgba(106, 76, 147, 0.4);
+}
+
+.glassmorphism {
+  background: rgba(30, 30, 40, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Custom input style */
+.input-field {
+  background: #252533;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #F5F5FA;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.input-field:focus {
+  border-color: #6A4C93;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(106, 76, 147, 0.2);
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
