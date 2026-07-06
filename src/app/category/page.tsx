@@ -7,7 +7,6 @@ export default async function CategoryListPage() {
   const categories = await db.getCategories();
   const allGames = await db.getGames();
 
-  // Calculate game count for each category
   const categoriesWithCounts = categories.map(cat => {
     const gameCount = allGames.filter(game => 
       game.categories?.some(c => c.id === cat.id)

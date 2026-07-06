@@ -4,7 +4,6 @@ import { db } from '@/lib/db';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://swclibrary.online';
 
-  // Fetch games, categories, and publishers
   const games = await db.getGames();
   const categories = await db.getCategories();
   const publishers = await db.getPublishers();

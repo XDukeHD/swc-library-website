@@ -6,7 +6,6 @@ import ClientPageTransition from '@/components/ClientPageTransition';
 import GameCard from '@/components/GameCard';
 import type { Metadata } from 'next';
 
-// Import interactive subcomponents
 import LikeButton from '@/components/game/LikeButton';
 import DownloadModal from '@/components/game/DownloadModal';
 import ReportModal from '@/components/game/ReportModal';
@@ -67,7 +66,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
     );
   }
 
-  // Load Recommended Games
   const allGames = await db.getGames();
   const recommendedGames = allGames
     .filter(g => g.id !== game.id && (
@@ -76,7 +74,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
     ))
     .slice(0, 4);
 
-  // Default FAQs
   const defaultFaqs = [
     {
       q: `How do I install this ${game.type} game on my Switch?`,

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { db, getPublicClient, getServerClient } from './db';
 import { Game, Mirror } from './types';
+import { verifyTurnstileToken } from './captcha';
 
 export async function likeGameAction(gameId: string) {
   const newLikes = await db.incrementLikes(gameId);
@@ -11,9 +12,22 @@ export async function likeGameAction(gameId: string) {
   return newLikes;
 }
 
-export async function addCommentAction(gameId: string, username: string, email: string, content: string) {
+export async function addCommentAction(
+  gameId: string,
+  username: string,
+  email: string,
+  content: string,
+  captchaToken: string
+) {
   if (!username || !email || !content) {
     throw new Error('All fields are required');
+  }
+  if (!captchaToken) {
+    throw new Error('Captcha verification is required.');
+  }
+  const isValid = await verifyTurnstileToken(captchaToken);
+  if (!isValid) {
+    throw new Error('Captcha verification failed. Please try again.');
   }
   const comment = await db.addComment(gameId, username, email, content);
   revalidatePath(`/roms/${gameId}`);
@@ -27,9 +41,21 @@ export async function deleteCommentAction(commentId: string) {
   return { success: true };
 }
 
-export async function addReportAction(gameId: string, email: string, reason: string) {
+export async function addReportAction(
+  gameId: string,
+  email: string,
+  reason: string,
+  captchaToken: string
+) {
   if (!email || !reason) {
     throw new Error('Email and Reason are required');
+  }
+  if (!captchaToken) {
+    throw new Error('Captcha verification is required.');
+  }
+  const isValid = await verifyTurnstileToken(captchaToken);
+  if (!isValid) {
+    throw new Error('Captcha verification failed. Please try again.');
   }
   const report = await db.addReport(gameId, email, reason);
   revalidatePath(`/roms/${gameId}`);

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiAlertTriangle, FiX, FiCheckCircle } from 'react-icons/fi';
 import { addReportAction } from '@/lib/actions';
+import Turnstile from '@/components/Turnstile';
 
 interface ReportModalProps {
   gameId: string;
@@ -17,6 +18,8 @@ export default function ReportModal({ gameId, gameTitle }: ReportModalProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,15 +27,23 @@ export default function ReportModal({ gameId, gameTitle }: ReportModalProps) {
       setError('Please fill in all fields.');
       return;
     }
+    if (!captchaToken) {
+      setError('Please complete the CAPTCHA verification.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
-      await addReportAction(gameId, email, reason);
+      await addReportAction(gameId, email, reason, captchaToken);
       setSuccess(true);
       setEmail('');
       setReason('');
+      setCaptchaToken('');
+      setCaptchaKey(prev => prev + 1);
     } catch (e: any) {
       setError(e.message || 'Something went wrong. Please try again.');
+      setCaptchaToken('');
+      setCaptchaKey(prev => prev + 1);
     } finally {
       setLoading(false);
     }
@@ -141,10 +152,17 @@ export default function ReportModal({ gameId, gameTitle }: ReportModalProps) {
                     />
                   </div>
 
+                  <Turnstile
+                    key={captchaKey}
+                    onVerify={(token) => setCaptchaToken(token)}
+                    onExpire={() => setCaptchaToken('')}
+                    onError={() => setCaptchaToken('')}
+                  />
+
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="mt-2 w-full bg-brand-red hover:bg-brand-red/90 text-white font-bold py-2.5 rounded-xl transition-all duration-200 active:scale-98 disabled:opacity-50 text-sm cursor-pointer"
+                    disabled={loading || !captchaToken}
+                    className="mt-2 w-full bg-brand-red hover:bg-brand-red/90 text-white font-bold py-2.5 rounded-xl transition-all duration-200 active:scale-98 disabled:opacity-55 text-sm cursor-pointer"
                   >
                     {loading ? 'Submitting...' : 'Submit Report'}
                   </button>

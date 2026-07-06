@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FiMessageSquare, FiSend, FiUser } from 'react-icons/fi';
 import { addCommentAction } from '@/lib/actions';
 import { Comment } from '@/lib/types';
+import Turnstile from '@/components/Turnstile';
 
 interface CommentsSectionProps {
   gameId: string;
@@ -17,6 +18,8 @@ export default function CommentsSection({ gameId, initialComments }: CommentsSec
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,15 +27,23 @@ export default function CommentsSection({ gameId, initialComments }: CommentsSec
       setError('Please fill in all fields.');
       return;
     }
+    if (!captchaToken) {
+      setError('Please complete the CAPTCHA verification.');
+      return;
+    }
     setLoading(true);
     setError('');
 
     try {
-      const newComment = await addCommentAction(gameId, username, email, content);
+      const newComment = await addCommentAction(gameId, username, email, content, captchaToken);
       setComments([newComment, ...comments]);
       setContent('');
+      setCaptchaToken('');
+      setCaptchaKey(prev => prev + 1);
     } catch (e: any) {
       setError(e.message || 'Failed to submit comment. Please try again.');
+      setCaptchaToken('');
+      setCaptchaKey(prev => prev + 1);
     } finally {
       setLoading(false);
     }
@@ -114,10 +125,17 @@ export default function CommentsSection({ gameId, initialComments }: CommentsSec
             />
           </div>
 
+          <Turnstile
+            key={captchaKey}
+            onVerify={(token) => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken('')}
+            onError={() => setCaptchaToken('')}
+          />
+
           <button
             type="submit"
-            disabled={loading}
-            className="flex items-center justify-center gap-1.5 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold py-2.5 rounded-xl transition-all duration-200 active:scale-98 disabled:opacity-50 text-sm cursor-pointer"
+            disabled={loading || !captchaToken}
+            className="flex items-center justify-center gap-1.5 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold py-2.5 rounded-xl transition-all duration-200 active:scale-98 disabled:opacity-55 text-sm cursor-pointer w-full"
           >
             <FiSend className="w-4 h-4" />
             {loading ? 'Posting...' : 'Post Comment'}
