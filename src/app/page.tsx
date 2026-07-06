@@ -106,7 +106,7 @@ export default async function Home({ searchParams }: HomeProps) {
                   </div>
                   <div className="aspect-[4/3] bg-bg-card rounded-xl overflow-hidden relative border border-white/5">
                     <img 
-                      src="https://images.unsplash.com/photo-1612287230202-1bf1d85d1bdf?w=400&q=80" 
+                      src="https://m.media-amazon.com/images/I/618GR0WMoQL._AC_UF1000,1000_QL80_.jpg" 
                       alt="Tears of the Kingdom" 
                       className="object-cover w-full h-full"
                     />
