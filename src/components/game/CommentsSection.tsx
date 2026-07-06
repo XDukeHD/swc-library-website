@@ -135,7 +135,7 @@ export default function CommentsSection({ gameId, initialComments }: CommentsSec
           <button
             type="submit"
             disabled={loading || !captchaToken}
-            className="flex items-center justify-center gap-1.5 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold py-2.5 rounded-xl transition-all duration-200 active:scale-98 disabled:opacity-55 text-sm cursor-pointer w-full"
+            className="flex items-center justify-center gap-1.5 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold py-2.5 rounded-xl transition-all duration-200 active:scale-98 disabled:opacity-55 disabled:pointer-events-none disabled:cursor-not-allowed text-sm w-full"
           >
             <FiSend className="w-4 h-4" />
             {loading ? 'Posting...' : 'Post Comment'}

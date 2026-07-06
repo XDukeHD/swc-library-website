@@ -162,7 +162,7 @@ export default function ReportModal({ gameId, gameTitle }: ReportModalProps) {
                   <button
                     type="submit"
                     disabled={loading || !captchaToken}
-                    className="mt-2 w-full bg-brand-red hover:bg-brand-red/90 text-white font-bold py-2.5 rounded-xl transition-all duration-200 active:scale-98 disabled:opacity-55 text-sm cursor-pointer"
+                    className="mt-2 w-full bg-brand-red hover:bg-brand-red/90 text-white font-bold py-2.5 rounded-xl transition-all duration-200 active:scale-98 disabled:opacity-55 disabled:pointer-events-none disabled:cursor-not-allowed text-sm"
                   >
                     {loading ? 'Submitting...' : 'Submit Report'}
                   </button>

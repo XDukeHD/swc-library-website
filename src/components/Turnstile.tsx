@@ -13,6 +13,16 @@ export default function Turnstile({ onVerify, onExpire, onError }: TurnstileProp
   const widgetIdRef = useRef<string | null>(null);
   const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITEKEY;
 
+  const onVerifyRef = useRef(onVerify);
+  const onExpireRef = useRef(onExpire);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onVerifyRef.current = onVerify;
+    onExpireRef.current = onExpire;
+    onErrorRef.current = onError;
+  });
+
   useEffect(() => {
     if (!siteKey) {
       console.error('NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITEKEY is missing.');
@@ -23,9 +33,9 @@ export default function Turnstile({ onVerify, onExpire, onError }: TurnstileProp
       if (typeof window !== 'undefined' && (window as any).turnstile && containerRef.current && !widgetIdRef.current) {
         widgetIdRef.current = (window as any).turnstile.render(containerRef.current, {
           sitekey: siteKey,
-          callback: onVerify,
-          'expired-callback': onExpire,
-          'error-callback': onError,
+          callback: (token: string) => onVerifyRef.current?.(token),
+          'expired-callback': () => onExpireRef.current?.(),
+          'error-callback': () => onErrorRef.current?.(),
         });
       }
     };
@@ -62,7 +72,7 @@ export default function Turnstile({ onVerify, onExpire, onError }: TurnstileProp
         script.removeEventListener('load', loadAndRender);
       }
     };
-  }, [siteKey, onVerify, onExpire, onError]);
+  }, [siteKey]);
 
   if (!siteKey) {
     return <div className="text-xs text-brand-red font-semibold">Turnstile Site Key missing</div>;
