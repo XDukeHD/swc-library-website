@@ -53,10 +53,14 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
     {
       q: `Can I play this game on PC emulators like Ryujinx or Yuzu/Suyu?`,
       a: `Yes, NSP and XCI files are compatible with PC emulators. Make sure to update your emulator's keys (prod.keys) and system firmware files to match or exceed the game's required firmware version (v${game.required_firmware || '16.0.0'}).`
+    },
+    {
+      q: `How to Bypass 1fichier Waiting Time?`,
+      a: `Check out https://nswpedia.com/tip/how-to-bypass-1fichier-waiting-time-download-limits for the solution.`
     }
-  ];
+  ];  
 
-  return (
+    return (
     <ClientPageTransition>
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-8 w-full flex-grow">
         
