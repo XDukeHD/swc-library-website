@@ -7,7 +7,7 @@ export default function Footer() {
   const branch = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF;
   const repoUrl = 'https://github.com/XDukeHD/swc-library-website';
 
-  const shortHash = commitHash?.slice(0, 7) || 'local';
+  const shortHash = commitHash?.slice(0, 7);
 
   return (
     <footer className="bg-bg-dark border-t border-white/5 py-12 px-6 md:px-12 mt-auto">
