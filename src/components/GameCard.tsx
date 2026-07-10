@@ -28,12 +28,11 @@ export default function GameCard({ game }: GameCardProps) {
           src={game.cover_image || 'https://images.unsplash.com/photo-1612287230202-1bf1d85d1bdf?w=600&q=80'}
           alt={game.title}
           fill
-          sizes="(max-w-768px) 100vw, (max-w-1200px) 50vw, 33vw"
-          className="object-cover transform group-hover:scale-105 transition-transform duration-500 ease-out"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
           priority={false}
         />
         
-        {/* Format Badge (NSP / XCI) */}
         <div className="absolute top-3 left-3 flex gap-2">
           <span className={`text-xs font-black px-2.5 py-1 rounded-md shadow-md uppercase tracking-wider ${
             game.type === 'XCI' 
@@ -44,7 +43,6 @@ export default function GameCard({ game }: GameCardProps) {
           </span>
         </div>
 
-        {/* Size Badge */}
         <div className="absolute bottom-3 right-3">
           <span className="text-[10px] font-bold bg-black/70 backdrop-blur-md text-text-primary px-2 py-0.5 rounded-full border border-white/10">
             {game.game_size || 'Unknown Size'}
@@ -77,7 +75,6 @@ export default function GameCard({ game }: GameCardProps) {
           </h3>
         </Link>
 
-        {/* Categories list */}
         {game.categories && game.categories.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
             {game.categories.slice(0, 2).map(cat => (

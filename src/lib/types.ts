@@ -74,3 +74,15 @@ export interface Admin {
   user_id: string;
   role: 'admin' | 'super_admin';
 }
+
+export interface DirectDownloadOption {
+  id: string;
+  game_id: string;
+  label: string;        // e.g. "Base Game v1.0 [NSP]"
+  cdn_url: string;      // Direct CDN URL
+  file_size?: string;   // e.g. "5.6 GB"
+  version?: string;     // e.g. "v1.3.0"
+  region?: string;      // e.g. "Global", "USA", "EUR"
+  sort_order: number;   // for ordering
+  created_at: string;
+}

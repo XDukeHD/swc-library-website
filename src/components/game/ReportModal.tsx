@@ -65,7 +65,6 @@ export default function ReportModal({ gameId, gameTitle }: ReportModalProps) {
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -74,7 +73,6 @@ export default function ReportModal({ gameId, gameTitle }: ReportModalProps) {
               className="absolute inset-0 bg-black/85 backdrop-blur-sm"
             />
 
-            {/* Modal Card */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -82,7 +80,6 @@ export default function ReportModal({ gameId, gameTitle }: ReportModalProps) {
               transition={{ duration: 0.3, ease: 'easeOut' }}
               className="relative w-full max-w-md bg-bg-surface border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-6 z-10 flex flex-col gap-5"
             >
-              {/* Header */}
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2 text-brand-red">
                   <FiAlertTriangle className="w-5 h-5" />

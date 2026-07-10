@@ -86,3 +86,20 @@ CREATE TABLE IF NOT EXISTS admins (
     role VARCHAR(50) CHECK (role IN ('admin', 'super_admin')) DEFAULT 'admin',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 9. Direct Download Options Table (CDN links for dl.* subdomain)
+CREATE TABLE IF NOT EXISTS direct_download_options (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    game_id UUID REFERENCES games(id) ON DELETE CASCADE,
+    label VARCHAR(255) NOT NULL,           -- e.g. "Base Game v1.0 [NSP]"
+    cdn_url TEXT NOT NULL,                 -- Direct CDN URL
+    file_size VARCHAR(50),                 -- e.g. "5.6 GB"
+    version VARCHAR(100),                  -- e.g. "v1.3.0"
+    region VARCHAR(50) DEFAULT 'Global',   -- e.g. "Global", "USA", "EUR"
+    sort_order INTEGER DEFAULT 0,          -- Display order
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index for fast lookups by game_id
+CREATE INDEX IF NOT EXISTS idx_direct_download_options_game_id
+    ON direct_download_options(game_id);

@@ -97,7 +97,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
     <ClientPageTransition>
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-8 w-full flex-grow">
         
-        {/* Back Link */}
         <Link 
           href="/" 
           className="text-xs font-bold text-text-secondary hover:text-brand-red inline-flex items-center gap-1 mb-8 transition-colors duration-200"
@@ -105,16 +104,15 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
           <FiChevronLeft /> BACK TO GAMES
         </Link>
 
-        {/* Main Header / Cover Layout */}
         <div className="grid md:grid-cols-12 gap-8 lg:gap-12 items-start mb-16">
           
-          {/* Cover & Quick Actions */}
           <div className="md:col-span-4 flex flex-col gap-4">
             <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-bg-surface w-full max-w-sm mx-auto md:mx-0">
               <Image
                 src={game.cover_image || 'https://images.unsplash.com/photo-1612287230202-1bf1d85d1bdf?w=600&q=80'}
                 alt={game.title}
                 fill
+                sizes="(max-width: 768px) 100vw, 33vw"
                 priority
                 className="object-cover"
               />
@@ -125,14 +123,12 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
               </span>
             </div>
 
-            {/* Like and Report Controls */}
             <div className="flex justify-between items-center max-w-sm mx-auto md:mx-0 w-full mt-2">
               <LikeButton gameId={game.id} initialLikes={game.likes} />
               <ReportModal gameId={game.id} gameTitle={game.title} />
             </div>
           </div>
 
-          {/* Details Metadata */}
           <div className="md:col-span-8 flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               {game.publisher && (
@@ -160,7 +156,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
               </div>
             </div>
 
-            {/* Technical Specifications Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 bg-bg-card border border-white/5 p-6 rounded-2xl">
               <div className="flex items-center gap-3">
                 <FiInfo className="text-brand-purple w-5 h-5 shrink-0" />
@@ -211,7 +206,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
               </div>
             </div>
 
-            {/* Description */}
             <div className="flex flex-col gap-2">
               <h3 className="font-bold text-text-primary text-base uppercase tracking-tight">Description</h3>
               <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
@@ -219,20 +213,22 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
               </p>
             </div>
 
-            {/* Download Action Component */}
             <div className="pt-4">
-              <DownloadModal downloadLinks={game.download_links || []} gameTitle={game.title} />
+              <DownloadModal 
+                downloadLinks={game.download_links || []} 
+                gameTitle={game.title} 
+                gameSlug={game.slug}
+                hasCdnLinks={!!game.direct_download_options && game.direct_download_options.length > 0}
+              />
             </div>
           </div>
         </div>
 
-        {/* Media (Screenshots & Trailer) */}
         {((game.screenshots && game.screenshots.length > 0) || game.trailer_url) && (
           <section className="mb-16 border-t border-white/5 pt-12">
             <h3 className="text-xl font-black uppercase text-text-primary tracking-tight mb-8">Game Media</h3>
             
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Screenshots Gallery */}
               {game.screenshots && game.screenshots.length > 0 && (
                 <div className="flex-1 flex flex-col gap-4">
                   <h4 className="font-bold text-sm text-text-secondary uppercase">Screenshots</h4>
@@ -250,7 +246,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
                 </div>
               )}
 
-              {/* YouTube Trailer */}
               {game.trailer_url && (
                 <div className="lg:w-[450px] shrink-0 flex flex-col gap-4">
                   <h4 className="font-bold text-sm text-text-secondary uppercase">Official Trailer</h4>
@@ -269,7 +264,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
           </section>
         )}
 
-        {/* FAQ Section */}
         <section className="mb-16 border-t border-white/5 pt-12">
           <h3 className="text-xl font-black uppercase text-text-primary tracking-tight mb-8">Frequently Asked Questions</h3>
           <div className="flex flex-col gap-4">
@@ -292,7 +286,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
           </div>
         </section>
 
-        {/* Recommended Games */}
         {recommendedGames.length > 0 && (
           <section className="mb-16 border-t border-white/5 pt-12">
             <h3 className="text-xl font-black uppercase text-text-primary tracking-tight mb-8">Recommended Games</h3>
@@ -304,7 +297,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
           </section>
         )}
 
-        {/* Comments Section */}
         <section className="border-t border-white/5 pt-12">
           <CommentsSection gameId={game.id} initialComments={game.comments || []} />
         </section>

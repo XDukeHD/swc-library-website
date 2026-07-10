@@ -223,3 +223,27 @@ export async function removeAdminAction(id: string) {
   revalidatePath('/admin');
   return { success: true };
 }
+
+export async function replaceDirectDownloadOptionsAction(
+  gameId: string,
+  options: { label: string; cdn_url: string; file_size?: string; version?: string; region?: string; sort_order: number; game_id: string }[]
+) {
+  await db.replaceDirectDownloadOptions(gameId, options);
+  revalidatePath('/admin');
+  revalidatePath(`/dl/${gameId}`);
+  return { success: true };
+}
+
+export async function fetchDirectDownloadOptionsAction(gameId: string) {
+  const supabase = await getServerClient();
+  const { data, error } = await supabase
+    .from('direct_download_options')
+    .select('*')
+    .eq('game_id', gameId)
+    .order('sort_order', { ascending: true });
+  if (error) {
+    console.error('fetchDirectDownloadOptionsAction error:', error.message);
+    return [];
+  }
+  return data || [];
+}

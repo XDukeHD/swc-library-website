@@ -7,15 +7,16 @@ import Image from 'next/image';
 export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 glassmorphism shadow-lg border-b border-white/5 py-4 px-6 md:px-12 flex flex-col sm:flex-row gap-4 items-center justify-between">
-      <Link href="/" className="flex items-center gap-2 group">
-      {/* <Image
-          src="/assets/img/logo-nbg.png"
-          alt="SWC Library Logo"
-          width={70}
-          height={70}
-          className="rounded-lg transition-transform group-hover:scale-105"
-        />*/}
-     <div className="bg-brand-red text-white font-black px-3 py-1.5 rounded-lg text-lg tracking-wider transform group-hover:scale-105 transition-all duration-200 shadow-md shadow-brand-red/20">
+      <Link href="/" className="flex items-center gap-3 group">
+        <Image 
+          src="/assets/img/logo-nbg.png" 
+          alt="SWC Library" 
+          width={32} 
+          height={32} 
+          style={{ width: 'auto', height: 'auto' }} 
+          className="rounded-lg group-hover:scale-105 transition-transform drop-shadow-md" 
+        />
+        <div className="bg-brand-red text-white font-black px-3 py-1.5 rounded-lg text-lg tracking-wider transform group-hover:scale-105 transition-all duration-200 shadow-md shadow-brand-red/20">
           SWC
         </div>
         <span className="text-text-primary font-bold text-xl tracking-tight group-hover:text-brand-purple transition-colors duration-200">

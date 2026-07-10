@@ -70,7 +70,6 @@ export default function CommentsSection({ gameId, initialComments }: CommentsSec
       </div>
 
       <div className="grid md:grid-cols-12 gap-8 items-start">
-        {/* Comment Form */}
         <form onSubmit={handleSubmit} className="md:col-span-5 bg-bg-card border border-white/5 p-6 rounded-2xl flex flex-col gap-4">
           <h4 className="font-bold text-sm text-text-primary uppercase tracking-tight">Post a Comment</h4>
           
@@ -142,7 +141,6 @@ export default function CommentsSection({ gameId, initialComments }: CommentsSec
           </button>
         </form>
 
-        {/* Comments List */}
         <div className="md:col-span-7 flex flex-col gap-4">
           {comments.length === 0 ? (
             <div className="text-center py-12 bg-bg-card rounded-2xl border border-white/5 text-text-secondary text-sm">

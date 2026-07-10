@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiDownload, FiX, FiExternalLink } from 'react-icons/fi';
 import { DownloadLink } from '@/lib/types';
@@ -8,10 +8,21 @@ import { DownloadLink } from '@/lib/types';
 interface DownloadModalProps {
   downloadLinks: DownloadLink[];
   gameTitle: string;
+  gameSlug: string;
+  hasCdnLinks: boolean;
 }
 
-export default function DownloadModal({ downloadLinks, gameTitle }: DownloadModalProps) {
+export default function DownloadModal({ downloadLinks, gameTitle, gameSlug, hasCdnLinks }: DownloadModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [cdnUrl, setCdnUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const protocol = window.location.protocol;
+      const cleanHost = window.location.host.replace(/^(www|dl)\./, '');
+      setCdnUrl(`${protocol}//dl.${cleanHost}/${gameSlug}`);
+    }
+  }, [gameSlug]);
 
   const groupedByServer = downloadLinks.reduce((acc, link) => {
     link.mirrors.forEach((mirror) => {
@@ -73,7 +84,7 @@ export default function DownloadModal({ downloadLinks, gameTitle }: DownloadModa
                   No download mirrors are currently available for this game.
                 </div>
               ) : (
-                <div className="flex flex-col gap-4 overflow-y-auto max-h-[350px] pr-1">
+                <div className="flex flex-col gap-4 overflow-y-auto max-h-[300px] pr-1">
                   {Object.entries(groupedByServer).map(([server, mirrors]) => (
                     <div 
                       key={server} 
@@ -98,6 +109,28 @@ export default function DownloadModal({ downloadLinks, gameTitle }: DownloadModa
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {hasCdnLinks && cdnUrl && (
+                <div className="flex flex-col gap-3 border-t border-white/5 pt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-px bg-white/5" />
+                    <span className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">or</span>
+                    <div className="flex-1 h-px bg-white/5" />
+                  </div>
+                  <a
+                    href={cdnUrl}
+                    className="flex items-center justify-between bg-gradient-to-r from-brand-red/10 to-brand-purple/10 border border-brand-red/30 hover:border-brand-red/60 text-text-primary px-4 py-3 rounded-xl transition-all duration-200 group text-sm font-bold shadow-lg shadow-brand-red/5"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-brand-red to-brand-purple flex items-center justify-center text-white text-[10px] font-black">
+                        CDN
+                      </span>
+                      <span>Download directly from the CDN</span>
+                    </div>
+                    <FiExternalLink className="w-4 h-4 text-brand-red group-hover:translate-x-0.5 transition-transform duration-200" />
+                  </a>
                 </div>
               )}
 

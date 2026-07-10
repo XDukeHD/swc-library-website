@@ -38,7 +38,6 @@ export default async function PublisherPage({ params }: PublisherPageProps) {
           <FiChevronLeft /> BACK TO HOME
         </Link>
 
-        {/* Publisher Info Header */}
         <div className="bg-bg-card border border-white/5 p-8 rounded-3xl mb-12 flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-purple/5 blur-3xl rounded-full -z-10" />
           
@@ -64,7 +63,6 @@ export default async function PublisherPage({ params }: PublisherPageProps) {
           </div>
         </div>
 
-        {/* Publisher Games Grid */}
         <h2 className="text-xl font-black text-text-primary uppercase mb-6 tracking-tight">
           Games Published by {publisher.name} ({games.length})
         </h2>

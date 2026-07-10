@@ -12,9 +12,11 @@ import {
   createCategoryAction, updateCategoryAction, deleteCategoryAction,
   createPublisherAction, updatePublisherAction, deletePublisherAction,
   deleteCommentAction, resolveReportAction,
-  addAdminAction, removeAdminAction, adminLogoutAction
+  addAdminAction, removeAdminAction, adminLogoutAction,
+  replaceDirectDownloadOptionsAction,
+  fetchDirectDownloadOptionsAction
 } from '@/lib/actions';
-import { Game, Category, Publisher, DownloadLink, Comment, Report, Admin, Mirror } from '@/lib/types';
+import { Game, Category, Publisher, DownloadLink, Comment, Report, Admin, Mirror, DirectDownloadOption } from '@/lib/types';
 import Image from 'next/image';
 
 interface FlatMirror {
@@ -22,6 +24,16 @@ interface FlatMirror {
   version: string;
   label: string;
   url: string;
+}
+
+interface FlatCdnLink {
+  id: string;
+  label: string;
+  cdn_url: string;
+  file_size: string;
+  version: string;
+  region: string;
+  sort_order: number;
 }
 
 interface DashboardConsoleProps {
@@ -76,6 +88,13 @@ export default function DashboardConsole({
   const [newMirrorLabel, setNewMirrorLabel] = useState('Google Drive');
   const [newMirrorUrl, setNewMirrorUrl] = useState('');
 
+  const [cdnLinks, setCdnLinks] = useState<FlatCdnLink[]>([]);
+  const [newCdnLabel, setNewCdnLabel] = useState('');
+  const [newCdnUrl, setNewCdnUrl] = useState('');
+  const [newCdnSize, setNewCdnSize] = useState('');
+  const [newCdnVersion, setNewCdnVersion] = useState('');
+  const [newCdnRegion, setNewCdnRegion] = useState('Global');
+
 
   const [catName, setCatName] = useState('');
   const [catSlug, setCatSlug] = useState('');
@@ -108,7 +127,7 @@ export default function DashboardConsole({
   };
 
 
-  const openGameModal = (game?: any) => {
+  const openGameModal = async (game?: any) => {
     if (game) {
       setEditId(game.id);
       setGameTitle(game.title);
@@ -140,6 +159,17 @@ export default function DashboardConsole({
         });
       });
       setGameDownloads(initialFlat);
+
+      const freshCdnLinks = await fetchDirectDownloadOptionsAction(game.id);
+      setCdnLinks(freshCdnLinks.map((opt: any) => ({
+        id: opt.id || Math.random().toString(36).substring(2, 9),
+        label: opt.label || '',
+        cdn_url: opt.cdn_url || '',
+        file_size: opt.file_size || '',
+        version: opt.version || '',
+        region: opt.region || 'Global',
+        sort_order: opt.sort_order ?? 0,
+      })));
     } else {
       setEditId(null);
       setGameTitle('');
@@ -158,6 +188,12 @@ export default function DashboardConsole({
       setGamePubId('');
       setGameCategoryIds([]);
       setGameDownloads([]);
+      setCdnLinks([]);
+      setNewCdnLabel('');
+      setNewCdnUrl('');
+      setNewCdnSize('');
+      setNewCdnVersion('');
+      setNewCdnRegion('Global');
     }
     setActiveModal('game');
   };
@@ -194,13 +230,28 @@ export default function DashboardConsole({
       version,
       mirrors
     }));
+    const cdnOptionsToSend = cdnLinks.map((link, idx) => ({
+      game_id: editId || '',
+      label: link.label,
+      cdn_url: link.cdn_url,
+      file_size: link.file_size || undefined,
+      version: link.version || undefined,
+      region: link.region || 'Global',
+      sort_order: idx,
+    }));
+
     try {
+      let savedGameId = editId;
       if (editId) {
         await updateGameAction(editId, gameData, gameCategoryIds, downloadLinksToSend);
         showFeedback('Game updated successfully!');
       } else {
-        await createGameAction(gameData, gameCategoryIds, downloadLinksToSend);
+        const newGame = await createGameAction(gameData, gameCategoryIds, downloadLinksToSend);
+        savedGameId = newGame.id;
         showFeedback('Game created successfully!');
+      }
+      if (savedGameId) {
+        await replaceDirectDownloadOptionsAction(savedGameId, cdnOptionsToSend.map(o => ({ ...o, game_id: savedGameId! })));
       }
       setActiveModal(null);
       router.refresh();
@@ -405,7 +456,6 @@ export default function DashboardConsole({
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 flex flex-col md:flex-row gap-8 w-full flex-grow">
       
-      {/* Sidebar Navigation */}
       <aside className="md:w-64 bg-bg-card border border-white/5 p-6 rounded-3xl shrink-0 flex flex-col gap-6 h-fit">
         <div className="flex flex-col">
           <span className="text-[10px] font-bold text-brand-red uppercase tracking-widest">Control Panel</span>
@@ -444,9 +494,7 @@ export default function DashboardConsole({
         </button>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col gap-6">
-        {/* Feedback Messages */}
         {error && (
           <div className="text-xs font-semibold bg-brand-red/10 border border-brand-red/20 text-brand-red p-3 rounded-xl animate-fade-in">
             {error}
@@ -458,7 +506,6 @@ export default function DashboardConsole({
           </div>
         )}
 
-        {/* Tab Panel Content */}
         {activeTab === 'games' && (
           <div className="flex flex-col gap-6">
             <div className="flex justify-between items-center">
@@ -772,7 +819,6 @@ export default function DashboardConsole({
           <div className="flex flex-col gap-6">
             <div className="grid md:grid-cols-12 gap-8 items-start">
               
-              {/* Add Admin Form */}
               <div className="md:col-span-5 bg-bg-card border border-white/5 p-6 rounded-2xl flex flex-col gap-4">
                 <h3 className="text-lg font-black uppercase text-text-primary tracking-tight">Create Administrator</h3>
                 <p className="text-xs text-text-secondary">
@@ -813,7 +859,6 @@ export default function DashboardConsole({
                 </form>
               </div>
 
-              {/* Admin List */}
               <div className="md:col-span-7 flex flex-col gap-4">
                 <h3 className="text-lg font-black uppercase text-text-primary tracking-tight">Authorized Admins</h3>
                 <div className="bg-bg-card border border-white/5 rounded-2xl overflow-hidden shadow-lg">
@@ -854,7 +899,6 @@ export default function DashboardConsole({
         )}
       </main>
 
-      {/* CRUD Modals */}
       {activeModal === 'game' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div onClick={() => setActiveModal(null)} className="absolute inset-0 bg-black/85 backdrop-blur-sm" />
@@ -1023,9 +1067,9 @@ export default function DashboardConsole({
               </div>
             </div>
 
-            {/* Download Links Section */}
             <div className="border-t border-white/5 pt-4 flex flex-col gap-4">
-              <h4 className="font-bold text-sm text-text-primary uppercase tracking-tight">Download Links</h4>
+              <h4 className="font-bold text-sm text-text-primary uppercase tracking-tight">Mirror Download Links</h4>
+              <p className="text-[10px] text-text-secondary -mt-2">These appear in the download modal on the main game page.</p>
               
               <div className="bg-bg-card p-4 rounded-xl flex flex-col gap-3">
                 <div className="grid md:grid-cols-3 gap-3">
@@ -1115,6 +1159,126 @@ export default function DashboardConsole({
                               </button>
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-4 flex flex-col gap-4">
+              <div>
+                <h4 className="font-bold text-sm text-text-primary uppercase tracking-tight flex items-center gap-2">
+                  CDN Direct Downloads
+                  <span className="text-[9px] font-bold bg-brand-purple/15 text-brand-purple border border-brand-purple/20 px-2 py-0.5 rounded-full normal-case tracking-normal">dl.swclibrary.online</span>
+                </h4>
+                <p className="text-[10px] text-text-secondary mt-0.5">Links exclusivos exibidos na página de download direto (subdomínio dl.*).</p>
+              </div>
+
+              <div className="bg-bg-card p-4 rounded-xl flex flex-col gap-3">
+                <div className="grid md:grid-cols-2 gap-3">
+                  <input
+                    type="text" placeholder="Label (e.g. Base Game v1.0 [NSP])"
+                    value={newCdnLabel} onChange={(e) => setNewCdnLabel(e.target.value)}
+                    className="input-field text-xs"
+                  />
+                  <input
+                    type="url" placeholder="CDN URL (direct link)"
+                    value={newCdnUrl} onChange={(e) => setNewCdnUrl(e.target.value)}
+                    className="input-field text-xs"
+                  />
+                  <input
+                    type="text" placeholder="File Size (e.g. 5.6 GB)"
+                    value={newCdnSize} onChange={(e) => setNewCdnSize(e.target.value)}
+                    className="input-field text-xs"
+                  />
+                  <input
+                    type="text" placeholder="Version (e.g. v1.3.0)"
+                    value={newCdnVersion} onChange={(e) => setNewCdnVersion(e.target.value)}
+                    className="input-field text-xs"
+                  />
+                  <select
+                    value={newCdnRegion} onChange={(e) => setNewCdnRegion(e.target.value)}
+                    className="input-field text-xs select-none"
+                  >
+                    <option value="Global">Global</option>
+                    <option value="USA">USA</option>
+                    <option value="EUR">EUR</option>
+                    <option value="JPN">JPN</option>
+                    <option value="BRA">BRA</option>
+                    <option value="KOR">KOR</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newCdnLabel || !newCdnUrl) { alert('Label and CDN URL are required'); return; }
+                      setCdnLinks([...cdnLinks, {
+                        id: Math.random().toString(36).substring(2, 9),
+                        label: newCdnLabel,
+                        cdn_url: newCdnUrl,
+                        file_size: newCdnSize,
+                        version: newCdnVersion,
+                        region: newCdnRegion,
+                        sort_order: cdnLinks.length,
+                      }]);
+                      setNewCdnLabel('');
+                      setNewCdnUrl('');
+                      setNewCdnSize('');
+                      setNewCdnVersion('');
+                      setNewCdnRegion('Global');
+                    }}
+                    className="bg-brand-purple hover:bg-brand-purple/90 text-white font-bold px-3 py-1.5 rounded-lg text-xs cursor-pointer"
+                  >
+                    Add CDN Link
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto mt-1">
+                  {cdnLinks.length === 0 ? (
+                    <span className="text-xs text-text-secondary text-center py-3">No CDN links added yet.</span>
+                  ) : (
+                    cdnLinks.map((link, idx) => (
+                      <div key={link.id} className="flex flex-col gap-2 bg-bg-surface p-3 rounded-lg border border-white/5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black bg-brand-purple text-white w-5 h-5 rounded flex items-center justify-center shrink-0">{idx + 1}</span>
+                          <input
+                            type="text"
+                            value={link.label}
+                            onChange={(e) => setCdnLinks(cdnLinks.map(l => l.id === link.id ? { ...l, label: e.target.value } : l))}
+                            className="input-field text-xs flex-1"
+                            placeholder="Label"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setCdnLinks(cdnLinks.filter(l => l.id !== link.id))}
+                            className="text-brand-red hover:underline font-bold text-xs shrink-0 px-2"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 pl-7">
+                          <input
+                            type="url"
+                            value={link.cdn_url}
+                            onChange={(e) => setCdnLinks(cdnLinks.map(l => l.id === link.id ? { ...l, cdn_url: e.target.value } : l))}
+                            className="input-field text-xs col-span-2"
+                            placeholder="CDN URL"
+                          />
+                          <input
+                            type="text"
+                            value={link.file_size}
+                            onChange={(e) => setCdnLinks(cdnLinks.map(l => l.id === link.id ? { ...l, file_size: e.target.value } : l))}
+                            className="input-field text-xs"
+                            placeholder="File size"
+                          />
+                          <input
+                            type="text"
+                            value={link.version}
+                            onChange={(e) => setCdnLinks(cdnLinks.map(l => l.id === link.id ? { ...l, version: e.target.value } : l))}
+                            className="input-field text-xs"
+                            placeholder="Version"
+                          />
                         </div>
                       </div>
                     ))
